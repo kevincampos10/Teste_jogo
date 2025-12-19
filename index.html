@@ -2,71 +2,107 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Meu Primeiro Jogo Web</title>
+    <title>Desvio de Carro</title>
     <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background: #f0f0f0; }
-        .board { display: grid; grid-template-columns: repeat(3, 100px); gap: 5px; margin-top: 20px; }
-        .cell { width: 100px; height: 100px; background: white; display: flex; align-items: center; 
-                justify-content: center; font-size: 2em; cursor: pointer; border: 2px solid #333; }
-        .cell:hover { background: #eee; }
-        .winner { margin-top: 20px; font-weight: bold; color: green; }
+        body { text-align: center; background: #333; color: white; font-family: sans-serif; overflow: hidden; }
+        canvas { background: #555; border: 4px solid #fff; display: block; margin: 20px auto; }
+        .info { font-size: 1.2em; }
     </style>
 </head>
 <body>
 
-    <h1>Jogo da Velha</h1>
-    <div class="board" id="board"></div>
-    <div class="winner" id="status"></div>
-    <button onclick="resetGame()" style="margin-top: 20px; padding: 10px;">Reiniciar</button>
+    <h1>Jogo de Carrinho</h1>
+    <p class="info">Use as <b>Setas (Esquerda/Direita)</b> para desviar!</p>
+    <canvas id="gameCanvas" width="400" height="500"></canvas>
+    <div id="scoreDisplay">Pontuação: 0</div>
 
     <script>
-        const boardElement = document.getElementById('board');
-        const statusElement = document.getElementById('status');
-        let board = ['', '', '', '', '', '', '', '', ''];
-        let currentPlayer = 'X';
-        let gameActive = true;
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const scoreDisplay = document.getElementById("scoreDisplay");
 
-        function createBoard() {
-            boardElement.innerHTML = '';
-            board.forEach((cell, index) => {
-                const cellElement = document.createElement('div');
-                cellElement.classList.add('cell');
-                cellElement.innerText = cell;
-                cellElement.addEventListener('click', () => handleMove(index));
-                boardElement.appendChild(cellElement);
-            });
-        }
+        let carWidth = 40;
+        let carHeight = 70;
+        let carX = canvas.width / 2 - carWidth / 2;
+        let carY = canvas.height - 100;
+        let carSpeed = 7;
 
-        function handleMove(index) {
-            if (board[index] !== '' || !gameActive) return;
-            board[index] = currentPlayer;
-            checkWinner();
-            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-            createBoard();
-        }
+        let obstacleWidth = 40;
+        let obstacleHeight = 70;
+        let obstacleX = Math.random() * (canvas.width - obstacleWidth);
+        let obstacleY = -100;
+        let obstacleSpeed = 4;
 
-        function checkWinner() {
-            const wins = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
-            for (let condition of wins) {
-                const [a, b, c] = condition;
-                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-                    statusElement.innerText = `Jogador ${board[a]} venceu!`;
-                    gameActive = false;
-                    return;
-                }
+        let score = 0;
+        let gameOver = false;
+        let keys = {};
+
+        // Detectar teclas
+        window.addEventListener("keydown", (e) => keys[e.code] = true);
+        window.addEventListener("keyup", (e) => keys[e.code] = false);
+
+        function update() {
+            if (gameOver) return;
+
+            // Movimentação do jogador
+            if (keys["ArrowLeft"] && carX > 0) carX -= carSpeed;
+            if (keys["ArrowRight"] && carX < canvas.width - carWidth) carX += carSpeed;
+
+            // Movimentação do obstáculo
+            obstacleY += obstacleSpeed;
+
+            // Resetar obstáculo quando sai da tela
+            if (obstacleY > canvas.height) {
+                obstacleY = -100;
+                obstacleX = Math.random() * (canvas.width - obstacleWidth);
+                score++;
+                obstacleSpeed += 0.2; // Aumenta a dificuldade
+                scoreDisplay.innerText = "Pontuação: " + score;
             }
-            if (!board.includes('')) statusElement.innerText = "Empate!";
+
+            // Colisão
+            if (carX < obstacleX + obstacleWidth &&
+                carX + carWidth > obstacleX &&
+                carY < obstacleY + obstacleHeight &&
+                carY + carHeight > obstacleY) {
+                gameOver = true;
+                alert("Game Over! Pontuação final: " + score);
+                location.reload(); // Reinicia o jogo
+            }
         }
 
-        function resetGame() {
-            board = ['', '', '', '', '', '', '', '', ''];
-            currentPlayer = 'X';
-            gameActive = true;
-            statusElement.innerText = '';
-            createBoard();
+        function draw() {
+            // Limpar tela
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Desenhar Estrada (faixas)
+            ctx.strokeStyle = "white";
+            ctx.setLineDash([20, 20]);
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.stroke();
+
+            // Desenhar Jogador (Carro Azul)
+            ctx.fillStyle = "#3498db";
+            ctx.fillRect(carX, carY, carWidth, carHeight);
+            
+            // Detalhe simples do carro (janela)
+            ctx.fillStyle = "#fff";
+            ctx.fillRect(carX + 5, carY + 10, carWidth - 10, 15);
+
+            // Desenhar Obstáculo (Carro Vermelho)
+            ctx.fillStyle = "#e74c3c";
+            ctx.fillRect(obstacleX, obstacleY, obstacleWidth, obstacleHeight);
         }
 
-        createBoard();
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        loop();
     </script>
 </body>
 </html>
