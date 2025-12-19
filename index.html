@@ -2,107 +2,90 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Desvio de Carro</title>
+    <title>Meu Perfil Dev</title>
     <style>
-        body { text-align: center; background: #333; color: white; font-family: sans-serif; overflow: hidden; }
-        canvas { background: #555; border: 4px solid #fff; display: block; margin: 20px auto; }
-        .info { font-size: 1.2em; }
+        body {
+            background-color: #2c3e50; /* Um azul escuro moderno */
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .cartao {
+            background-color: #8e44ad;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            width: 300px;
+        }
+
+        .foto {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid #3498db;
+            margin-bottom: 15px;
+        }
+
+        h1 { margin: 10px 0; font-size: 24px; }
+        p { color: #bdc3c7; }
+
+        .botao {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .botao:hover {
+            background-color: #2980b9;
+        }
     </style>
 </head>
+   <script>
+    // Criamos a caixinha para guardar os cliques
+    let contador = 0;
+
+    // Encontramos o botão que você acabou de criar pelo ID
+    const botao = document.getElementById("meuBotao");
+
+    // Quando o botão for clicado, ele faz isso:
+    botao.onclick = function() {
+        // Soma +1 ao contador
+        contador = contador + 1;
+        
+        // Troca o texto do botão pelo novo número
+        botao.innerText = "Cliques: " + contador;
+
+        // Uma surpresa quando chegar a 5!
+        if (contador === 5) {
+            alert("Mandou bem, Kevin! O contador está funcionando!");
+        }
+    };
+</script> 
 <body>
 
-    <h1>Jogo de Carrinho</h1>
-    <p class="info">Use as <b>Setas (Esquerda/Direita)</b> para desviar!</p>
-    <canvas id="gameCanvas" width="400" height="500"></canvas>
-    <div id="scoreDisplay">Pontuação: 0</div>
+    <div class="cartao">
+        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Nerd" alt="Minha Foto" class="foto">
+        
+        <h1>Kevin Campos</h1>
+        <p>Futuro Desenvolvedor de melhorias para a empresa</p>
+        
+        <hr>
+        
+        <p>Estou aprendendo HTML, CSS e JavaScript para criar mundos incríveis.</p>
+        
+        <button class="botao" id="meuBotao">Cliques: 0</button>
+    </div>
 
-    <script>
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
-        const scoreDisplay = document.getElementById("scoreDisplay");
-
-        let carWidth = 40;
-        let carHeight = 70;
-        let carX = canvas.width / 2 - carWidth / 2;
-        let carY = canvas.height - 100;
-        let carSpeed = 7;
-
-        let obstacleWidth = 40;
-        let obstacleHeight = 70;
-        let obstacleX = Math.random() * (canvas.width - obstacleWidth);
-        let obstacleY = -100;
-        let obstacleSpeed = 4;
-
-        let score = 0;
-        let gameOver = false;
-        let keys = {};
-
-        // Detectar teclas
-        window.addEventListener("keydown", (e) => keys[e.code] = true);
-        window.addEventListener("keyup", (e) => keys[e.code] = false);
-
-        function update() {
-            if (gameOver) return;
-
-            // Movimentação do jogador
-            if (keys["ArrowLeft"] && carX > 0) carX -= carSpeed;
-            if (keys["ArrowRight"] && carX < canvas.width - carWidth) carX += carSpeed;
-
-            // Movimentação do obstáculo
-            obstacleY += obstacleSpeed;
-
-            // Resetar obstáculo quando sai da tela
-            if (obstacleY > canvas.height) {
-                obstacleY = -100;
-                obstacleX = Math.random() * (canvas.width - obstacleWidth);
-                score++;
-                obstacleSpeed += 0.2; // Aumenta a dificuldade
-                scoreDisplay.innerText = "Pontuação: " + score;
-            }
-
-            // Colisão
-            if (carX < obstacleX + obstacleWidth &&
-                carX + carWidth > obstacleX &&
-                carY < obstacleY + obstacleHeight &&
-                carY + carHeight > obstacleY) {
-                gameOver = true;
-                alert("Game Over! Pontuação final: " + score);
-                location.reload(); // Reinicia o jogo
-            }
-        }
-
-        function draw() {
-            // Limpar tela
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Desenhar Estrada (faixas)
-            ctx.strokeStyle = "white";
-            ctx.setLineDash([20, 20]);
-            ctx.beginPath();
-            ctx.moveTo(canvas.width / 2, 0);
-            ctx.lineTo(canvas.width / 2, canvas.height);
-            ctx.stroke();
-
-            // Desenhar Jogador (Carro Azul)
-            ctx.fillStyle = "#3498db";
-            ctx.fillRect(carX, carY, carWidth, carHeight);
-            
-            // Detalhe simples do carro (janela)
-            ctx.fillStyle = "#fff";
-            ctx.fillRect(carX + 5, carY + 10, carWidth - 10, 15);
-
-            // Desenhar Obstáculo (Carro Vermelho)
-            ctx.fillStyle = "#e74c3c";
-            ctx.fillRect(obstacleX, obstacleY, obstacleWidth, obstacleHeight);
-        }
-
-        function loop() {
-            update();
-            draw();
-            requestAnimationFrame(loop);
-        }
-
-        loop();
-    </script>
 </body>
 </html>
