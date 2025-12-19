@@ -34,6 +34,7 @@
 
         h1 { margin: 10px 0; font-size: 24px; }
         p { color: #bdc3c7; }
+        
 
         .botao {
             display: inline-block;
@@ -62,29 +63,30 @@
         <hr>
         
         <p>Estou aprendendo HTML, CSS e JavaScript para criar mundos incríveis.</p>
-        
+
+        <input type="text" id="campoNome" placeholder="Digite seu nome aqui" style="padding: 10px; border-radius: 5px; border: none; margin-bottom: 10px; width: 80%;">
+<br>
         <button class="botao" id="meuBotao">Cliques: 0</button>
     </div>
    <script>
-    // Criamos a caixinha para guardar os cliques
     let contador = 0;
+const botao = document.getElementById("meuBotao");
+const campo = document.getElementById("campoNome");
+const titulo = document.querySelector("h1"); // Seleciona o seu nome (H1)
 
-    // Encontramos o botão que você acabou de criar pelo ID
-    const botao = document.getElementById("meuBotao");
+botao.onclick = function() {
+    contador = contador + 1;
+    
+    // Pega o que foi escrito no campo
+    let nomeUsuario = campo.value;
 
-    // Quando o botão for clicado, ele faz isso:
-    botao.onclick = function() {
-        // Soma +1 ao contador
-        contador = contador + 1;
-        
-        // Troca o texto do botão pelo novo número
-        botao.innerText = "Cliques: " + contador;
+    // Se o campo não estiver vazio, muda o título
+    if (nomeUsuario !== "") {
+        titulo.innerText = "Olá, " + nomeUsuario + "!";
+    }
 
-        // Uma surpresa quando chegar a 5!
-        if (contador === 5) {
-            alert("Mandou bem, Kevin! O contador está funcionando!");
-        }
-    };
+    botao.innerText = "Cliques: " + contador;
+};
 </script> 
 </body>
 </html>
